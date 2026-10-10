@@ -1,0 +1,28 @@
+# Environment files
+.env
+.env.*
+!.env.sample
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Test and tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Local Docker and database artifacts
+*.log
+postgres_data/
