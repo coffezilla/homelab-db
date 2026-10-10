@@ -14,8 +14,9 @@ docker compose up -d --build
 
 Endpoints:
 
-- `POST http://<host>:8000/api/save-users`: salva o usuário de exemplo.
-- `POST http://<host>:8000/api/save-posts`: salva os dois posts de exemplo.
+- `POST http://<host>:8000/api/save-users`: salva um novo usuário a cada chamada.
+- `POST http://<host>:8000/api/save-posts`: salva dois novos posts a cada chamada,
+  associados ao usuário mais recente.
 - `GET http://<host>:8000/health`: verifica se a API está disponível.
 
 Exemplo:
@@ -24,6 +25,9 @@ Exemplo:
 curl -X POST http://<host>:8000/api/save-users
 curl -X POST http://<host>:8000/api/save-posts
 ```
+
+Os IDs são gerados pelo PostgreSQL e avançam progressivamente. As chamadas não
+reutilizam registros existentes.
 
 Também é possível executar os scripts diretamente no container:
 

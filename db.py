@@ -1,4 +1,5 @@
 import os
+from uuid import uuid4
 from contextlib import contextmanager
 
 import psycopg
@@ -43,25 +44,26 @@ def init_db():
 
 
 def save_user():
+    email = f"homelab-{uuid4()}@example.com"
     with connection() as conn:
         row = conn.execute(
             """
             INSERT INTO "user" (name, email)
             VALUES (%s, %s)
-            ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name
             RETURNING id, name, email
             """,
-            ("Homelab User", "homelab@example.com"),
+            ("Homelab User", email),
         ).fetchone()
     return {"id": row[0], "name": row[1], "email": row[2]}
 
 
 def save_posts():
     with connection() as conn:
-        user = conn.execute(
-            'SELECT id FROM "user" WHERE email = %s',
-            ("homelab@example.com",),
-        ).fetchone()
+        query = (
+            'SELECT id FROM "user" '
+            "ORDER BY id DESC LIMIT 1"
+        )
+        user = conn.execute(query).fetchone()
         if user is None:
             raise RuntimeError("Execute save_user before saving posts")
 
@@ -73,21 +75,17 @@ def save_posts():
             row = conn.execute(
                 """
                 INSERT INTO posts (user_id, title, content)
-                SELECT %s, %s, %s
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM posts WHERE user_id = %s AND title = %s
-                )
+                VALUES (%s, %s, %s)
                 RETURNING id, user_id, title, content
                 """,
-                (user[0], title, content, user[0], title),
+                (user[0], title, content),
             ).fetchone()
-            if row is not None:
-                posts.append(
-                    {
-                        "id": row[0],
-                        "user_id": row[1],
-                        "title": row[2],
-                        "content": row[3],
-                    }
-                )
+            posts.append(
+                {
+                    "id": row[0],
+                    "user_id": row[1],
+                    "title": row[2],
+                    "content": row[3],
+                }
+            )
     return posts
